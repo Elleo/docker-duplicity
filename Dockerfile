@@ -13,7 +13,7 @@ ENV DST='' \
     OPTIONS_EXTRA='' \
     SMTP_HOST='smtp' \
     SMTP_PORT='25' \
-    SRC='/backup' \
+    SRC='/data' \
     S3_ACCESS_KEY='' \
     S3_ACCESS_TOKEN='' \
     S3_SECRET_KEY='' \
@@ -21,10 +21,9 @@ ENV DST='' \
     S3_BUCKET='' \
     JOB_100_WHAT='s3cmd --access_key=$S3_ACCESS_KEY --access_token=$S3_ACCESS_TOKEN --secret_key=$S3_SECRET_KEY sync s3://$S3_BUCKET $SRC' \
     JOB_100_WHEN='daily weekly' \
-    MYSQL_HOST='' \
+    MYSQL_HOST='mysql' \
     MYSQL_USER='root' \
     MYSQL_PASSWORD='' \
-    MYSQL_HOST='mysql' \
     JOB_200_WHAT='mysqldump -A -u $MYSQL_USER --password=$MYSQL_PASSWORD -h $MYSQL_HOST --single-transaction --routines --triggers --events --add-drop-database > "$SRC/all-databases.sql"' \
     JOB_200_WHEN='daily weekly' \
     JOB_700_WHAT='rm $SRC/all-databases.sql' \
