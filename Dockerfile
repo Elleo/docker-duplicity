@@ -1,5 +1,5 @@
 FROM alpine
-MAINTAINER Tecnativa <info@tecnativa.com>
+MAINTAINER Mike Sheldon <mike@bloomsbury.ai>
 
 ARG DUPLICITY_VERSION=0.7.15
 
@@ -8,12 +8,27 @@ ENV DST='' \
     EMAIL_SUBJECT='Backup report: {hostname} - {periodicity} - {result}' \
     EMAIL_TO='' \
     JOB_300_WHAT='backup' \
-    JOB_300_WHEN='daily' \
+    JOB_300_WHEN='daily weekly' \
     OPTIONS='' \
     OPTIONS_EXTRA='' \
     SMTP_HOST='smtp' \
     SMTP_PORT='25' \
-    SRC='/mnt/backup/src'
+    SRC='/backup' \
+    S3_ACCESS_KEY='' \
+    S3_ACCESS_TOKEN='' \
+    S3_SECRET_KEY='' \
+    S3_HOST='s3.amazonaws.com' \
+    S3_BUCKET='' \
+    JOB_100_WHAT='s3cmd --access_key=$S3_ACCESS_KEY --access_token=$S3_ACCESS_TOKEN --secret_key=$S3_SECRET_KEY sync s3://$S3_BUCKET $SRC' \
+    JOB_100_WHEN='daily weekly' \
+    MYSQL_HOST='' \
+    MYSQL_USER='root' \
+    MYSQL_PASSWORD='' \
+    MYSQL_HOST='mysql' \
+    JOB_200_WHAT='mysqldump -A -u $MYSQL_USER --password=$MYSQL_PASSWORD -h $MYSQL_HOST --single-transaction --routines --triggers --events --add-drop-database > "$SRC/all-databases.sql"' \
+    JOB_200_WHEN='daily weekly' \
+    JOB_700_WHAT='rm $SRC/all-databases.sql' \
+    JOB_700_WHEN='daily weekly'
 
 CMD ["/usr/sbin/crond", "-fd8"]
 
@@ -37,7 +52,10 @@ RUN apk add --no-cache \
         openssh \
         openssl \
         py2-gobject3 \
-        python
+        python \
+        mariadb-client \
+        ca-certificates \
+    && rm -rf /var/cache/apk/*
 
 # Default backup source directory
 RUN mkdir -p "$SRC"
@@ -52,6 +70,8 @@ RUN apk add --no-cache --virtual .build \
         openssl-dev \
         py2-pip \
         python-dev \
+        py-setuptools \
+        git \
     && pip install --no-cache-dir \
         azure-storage \
         boto \
@@ -71,7 +91,12 @@ RUN apk add --no-cache --virtual .build \
         requests \
         requests-oauthlib \
         urllib3 \
+        python-magic \
         https://code.launchpad.net/duplicity/$(echo $DUPLICITY_VERSION | sed -r 's/^([0-9]+\.[0-9]+)([0-9\.]*)$/\1/')-series/$DUPLICITY_VERSION/+download/duplicity-$DUPLICITY_VERSION.tar.gz \
+    && git clone https://github.com/s3tools/s3cmd.git /tmp/s3cmd \
+    && cd /tmp/s3cmd \
+    && python setup.py install \
+    && rm -rf /tmp/s3cmd \
     && apk del .build
 COPY bin/* /usr/local/bin/
 RUN chmod a+rx /usr/local/bin/* && sync
@@ -80,8 +105,8 @@ RUN chmod a+rx /usr/local/bin/* && sync
 ARG VCS_REF
 ARG BUILD_DATE
 LABEL org.label-schema.schema-version="1.0" \
-      org.label-schema.vendor=Tecnativa \
+      org.label-schema.vendor="Bloomsbury AI" \
       org.label-schema.license=Apache-2.0 \
       org.label-schema.build-date="$BUILD_DATE" \
       org.label-schema.vcs-ref="$VCS_REF" \
-      org.label-schema.vcs-url="https://github.com/Tecnativa/docker-duplicity"
+      org.label-schema.vcs-url="https://github.com/Elleo/docker-duplicity"
