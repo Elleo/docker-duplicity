@@ -54,6 +54,7 @@ RUN apk add --no-cache \
         python \
         mariadb-client \
         ca-certificates \
+        py-setuptools \
     && rm -rf /var/cache/apk/*
 
 # Default backup source directory
@@ -69,7 +70,6 @@ RUN apk add --no-cache --virtual .build \
         openssl-dev \
         py2-pip \
         python-dev \
-        py-setuptools \
         git \
     && pip install --no-cache-dir \
         azure-storage \
