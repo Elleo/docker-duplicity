@@ -17,9 +17,9 @@ ENV DST='' \
     S3_ACCESS_KEY='' \
     S3_ACCESS_TOKEN='' \
     S3_SECRET_KEY='' \
-    S3_HOST='s3.amazonaws.com' \
     S3_BUCKET='' \
-    JOB_100_WHAT='s3cmd --access_key=$S3_ACCESS_KEY --access_token=$S3_ACCESS_TOKEN --secret_key=$S3_SECRET_KEY sync s3://$S3_BUCKET $SRC' \
+    S3_OPTIONS='' \
+    JOB_100_WHAT='s3cmd $S3_OPTIONS --access_key=$S3_ACCESS_KEY --access_token=$S3_ACCESS_TOKEN --secret_key=$S3_SECRET_KEY sync s3://$S3_BUCKET $SRC' \
     JOB_100_WHEN='daily weekly' \
     MYSQL_HOST='mysql' \
     MYSQL_USER='root' \
